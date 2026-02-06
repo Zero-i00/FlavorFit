@@ -5,13 +5,13 @@ from database.models.user import RoleEnum
 class UserInput:
     email: str
     password: str
-    role: RoleEnum = RoleEnum.USER
     is_active: bool = True
+    role: RoleEnum = RoleEnum.USER
 
 
 @strawberry.type
 class UserOutput:
     id: int
+    role: str
     email: str
-    role: RoleEnum
     is_active: bool

@@ -78,8 +78,8 @@ class UserService:
     def to_schema(obj: UserModel) -> UserOutput:
         return UserOutput(
             id=obj.id,
-            role=obj.role,
             email=obj.email,
+            role=obj.role.name,
             is_active=obj.is_active,
         )
     
