@@ -1,8 +1,16 @@
 from enum import Enum
-from typing import Optional
+from typing import List
 from sqlalchemy import ForeignKey
+from typing import TYPE_CHECKING, Optional
 from database.orm import Base, max_char_field
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+
+if TYPE_CHECKING:
+    from database.models.recipe import RecipeModel
+    from database.models.order import CartModel, OrderModel
+    from database.models.reaction import CommentModel, FavoriteModel
+
 
 class RoleEnum(Enum):
     USER = 'USER'
@@ -38,6 +46,13 @@ class UserModel(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     profile: Mapped[Optional['ProfileModel']] = relationship(back_populates="user")
+    cart: Mapped[Optional['CartModel']] = relationship(back_populates='user')
+    parameters: Mapped[Optional['BodyParameterModel']] = relationship(back_populates="user")
+    recipes: Mapped[List["RecipeModel"]] = relationship(back_populates="author")
+    comments: Mapped[List["CommentModel"]] = relationship(back_populates="author")
+    orders: Mapped[List["OrderModel"]] = relationship(back_populates="user")
+    favorites: Mapped[List["FavoriteModel"]] = relationship(back_populates="author")
+
 
 
 class ProfileModel(Base):

@@ -16,14 +16,11 @@ class Base(DeclarativeBase):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    created_at: Annotated[
-        datetime.datetime, 
-        mapped_column(server_default=text("TIMEZONE('utc', now())"))
-    ]
-    
-    updated_at: Annotated[
-        datetime.datetime, 
-        mapped_column(
-            server_default=text("TIMEZONE('utc', now())"),
-            onupdate=datetime.datetime.utcnow,
-        )]
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        server_default=text("TIMEZONE('utc', now())")
+    )
+
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        server_default=text("TIMEZONE('utc', now())"),
+        onupdate=datetime.datetime.utcnow,
+    )
