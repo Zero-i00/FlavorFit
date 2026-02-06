@@ -1,3 +1,4 @@
+import strawberry
 from enum import Enum
 from typing import List
 from sqlalchemy import ForeignKey
@@ -12,15 +13,19 @@ if TYPE_CHECKING:
     from database.models.reaction import CommentModel, FavoriteModel
 
 
+@strawberry.enum
 class RoleEnum(Enum):
     USER = 'USER'
     ADMIN = 'ADMIN'
 
+
+@strawberry.enum
 class GenderEnum(Enum):
     MALE = 'MALE'
     FEMALE = 'FEMALE'
 
 
+@strawberry.enum
 class ActivityLevelEnum(Enum):
     SEDENTARY = 'SEDENTARY'
     LIGHT = 'LIGHT'
@@ -29,6 +34,7 @@ class ActivityLevelEnum(Enum):
     VERY_ACTIVE = 'VERY_ACTIVE'
 
 
+@strawberry.enum
 class NutritionGoalEnum(Enum):
     WEIGHT_LOSS = 'WEIGHT_LOSS'
     MAINTENANCE = 'MAINTENANCE'

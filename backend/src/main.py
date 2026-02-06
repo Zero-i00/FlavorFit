@@ -10,6 +10,10 @@ from database.session import engine
 
 from contextlib import asynccontextmanager
 
+from modules.schema import graphql_schema
+from strawberry.fastapi import GraphQLRouter
+from config.graphql import get_graphql_context
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,6 +25,10 @@ app = FastAPI(
     lifespan=lifespan,
     title=settings.app_name,
 )
+
+graphql_router = GraphQLRouter(graphql_schema, context_getter=get_graphql_context)
+app.include_router(graphql_router, prefix='/graphql')
+
 
 @app.get('/')
 async def health_check():

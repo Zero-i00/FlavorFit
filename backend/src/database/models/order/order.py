@@ -1,3 +1,4 @@
+import strawberry
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 from database.orm import Base, max_text_field
@@ -8,6 +9,8 @@ if TYPE_CHECKING:
     from database.models.user import UserModel
     from database.models.order import CartModel
 
+
+@strawberry.enum
 class OrderStatusEnum(Enum):
     PENDING = 'PENDING'
     PROCESSING = 'PROCESSING'

@@ -1,3 +1,4 @@
+import strawberry
 from enum import Enum
 from typing import TYPE_CHECKING, List
 from database.orm import Base
@@ -10,6 +11,7 @@ if TYPE_CHECKING:
     from database.models.recipe import RecipeIngredientModel
     from database.models.reaction import CommentModel, FavoriteModel
 
+@strawberry.enum
 class RecipeTypeEnum(Enum):
     FIRST = 'FIRST'
     SECOND = 'SECOND'
@@ -22,6 +24,7 @@ class RecipeTypeEnum(Enum):
     COLD_APPETIZERS = 'COLD_APPETIZERS'
 
 
+@strawberry.enum
 class RecipeDifficultyEnum(Enum):
     EASY = 'EASY'
     MEDIUM = 'MEDIUM'
