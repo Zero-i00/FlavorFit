@@ -20,8 +20,20 @@ class AuthMutation:
 
     @strawberry.mutation
     async def login(self, info: ContextInfo, data: AuthInput) -> AuthOutput:
-        return await auth_service.login(info.context.session, data)
+        response = await auth_service.login(info.context.session, data)
+
+        refresh_token = auth_service.create_refresh_token(response.user)
+        if info.context.response:
+            auth_service.set_refresh_token_to_cookie(info.context.response, refresh_token)
+
+        return response
     
     @strawberry.mutation
     async def register(self, info: ContextInfo, data: AuthInput) -> AuthOutput:
-        return await auth_service.register(info.context.session, data)
+        response = await auth_service.register(info.context.session, data)
+
+        refresh_token = auth_service.create_refresh_token(response.user)
+        if info.context.response:
+            auth_service.set_refresh_token_to_cookie(info.context.response, refresh_token)
+
+        return response

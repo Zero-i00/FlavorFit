@@ -79,7 +79,7 @@ class UserService:
         return UserOutput(
             id=obj.id,
             email=obj.email,
-            role=obj.role.name,
+            role=obj.role.value,
             is_active=obj.is_active,
         )
     

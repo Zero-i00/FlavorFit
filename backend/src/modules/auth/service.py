@@ -1,5 +1,7 @@
+from datetime import timedelta
 from fastapi import (
     status,
+    Response,
     HTTPException
 )
 
@@ -13,6 +15,9 @@ from modules.user.schema import UserInput, UserOutput
 
 from modules.auth.strategy.jwt_token import jwt_strategy
 from modules.auth.schema import AuthInput, AuthOutput, AuthTokenEnum
+
+from config.settings import settings, auth_settings, IS_DEBUG
+
 
 class AuthService:
 
@@ -79,10 +84,36 @@ class AuthService:
             'role': user.role,
             'user_id': user.id,
             'email': user.email,
-            'type': AuthTokenEnum.ACCESS_TOKEN.name
+            'type': AuthTokenEnum.ACCESS_TOKEN.value
         }
 
         return jwt_strategy.encode_jwt(payload)
+    
+
+    @staticmethod
+    def create_refresh_token(user: UserOutput) -> str:
+        payload = {
+            'sub': user.email,
+            'user_id': user.id,
+            'type': AuthTokenEnum.REFRESH_TOKEN.value
+        }
+
+        return jwt_strategy.encode_jwt(
+            payload=payload,
+            expire_timedelta=timedelta(days=auth_settings.auth_refresh_token_expire_days)
+        )
+    
+    @staticmethod
+    def set_refresh_token_to_cookie(response: Response, refresh_token: str):
+        response.set_cookie(
+            key=AuthTokenEnum.REFRESH_TOKEN.value,
+            value=refresh_token,
+            httponly=True,
+            secure=True,
+            domain=settings.app_host,
+            samesite='none' if IS_DEBUG else 'strict',
+            expires=timedelta(days=auth_settings.auth_refresh_token_expire_days).seconds
+        )
 
 
 auth_service = AuthService()
