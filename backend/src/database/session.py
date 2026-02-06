@@ -1,4 +1,4 @@
-from config import database_settings, IS_DEBUG
+from config.settings import database_settings, IS_DEBUG
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 engine = create_async_engine(

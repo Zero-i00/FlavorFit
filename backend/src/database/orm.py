@@ -1,7 +1,7 @@
 import datetime
 from typing import Annotated
 from sqlalchemy import String, text
-from constants.models import MAX_CHAR_FIELD, MAX_TEXT_FIELD
+from config.constants import MAX_CHAR_FIELD, MAX_TEXT_FIELD
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 max_char_field = Annotated[str, MAX_CHAR_FIELD]
