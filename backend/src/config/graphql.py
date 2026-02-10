@@ -5,6 +5,7 @@ from database.session import get_session
 from modules.user.schema import UserOutput
 from strawberry.fastapi import BaseContext
 from modules.auth.service import auth_service
+from modules.auth.schema import AuthTokenEnum
 from modules.user.service import user_service
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,8 +21,10 @@ async def get_graphql_context(
     session=Depends(get_session)
 ) -> GraphQLContext:
     try:
-        payload = auth_service.get_authorized_user(request)
-        print(payload)
+        payload = auth_service.get_token_payload(
+            request=request, 
+            token_type=AuthTokenEnum.ACCESS_TOKEN
+        )
 
         user_id = payload.get('user_id', None)
         if user_id is None:

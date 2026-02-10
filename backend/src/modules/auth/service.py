@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Optional
+from typing import Any, Optional
 from fastapi import (
     Request,
     status,
@@ -21,6 +21,17 @@ from config.settings import settings, auth_settings, IS_DEBUG
 
 
 class AuthService:
+    def __init__(self) -> None:
+        self.invalid_token_exception = HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid jwt token",
+            )
+        
+        self.user_not_found_exception = HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found'
+        )
+    
 
     async def register(self, session: AsyncSession, data: AuthInput) -> AuthOutput:
         data.email = data.email.lower()
@@ -54,10 +65,7 @@ class AuthService:
         existing = result.scalar_one_or_none()
 
         if existing is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f'Пользователя с почтой {data.email} не существует'
-            )
+            raise self.user_not_found_exception
         
         if not user_service.validate_password(data.password, existing.password):
             raise HTTPException(
@@ -73,6 +81,57 @@ class AuthService:
             user=user,
             access_token=access_token
         )
+
+    async def refresh_token(self, session: AsyncSession, request: Request) -> AuthOutput:
+        payload = self.get_token_payload(
+            request=request, 
+            token_type=AuthTokenEnum.REFRESH_TOKEN
+        )
+
+        user_id = payload.get('user_id', None)
+        if user_id is None:
+            raise self.user_not_found_exception
+
+        user = await user_service.retrieve(session, int(user_id))
+        if user is None:
+            raise self.user_not_found_exception
+
+        access_token = self.create_access_token(user)
+
+        return AuthOutput(
+            user=user,
+            access_token=access_token
+        )
+    
+    async def logout(self, session: AsyncSession, refresh_token: str) -> None:
+        # TODO jwt refresh token black list
+        return
+        
+    def get_token_payload(self, request: Request, token_type: AuthTokenEnum) -> dict[str, Any]:
+        match token_type:
+            case AuthTokenEnum.ACCESS_TOKEN:
+                auth_header: Optional[str] = request.headers.get("Authorization")
+                if not auth_header:
+                    raise self.invalid_token_exception
+                
+                schema, _, token = auth_header.partition(" ")
+
+                if schema.lower() != 'bearer':
+                    raise self.invalid_token_exception
+                
+            case AuthTokenEnum.REFRESH_TOKEN:
+                token = request.cookies.get(token_type.value, None)
+                print(token)
+                if token is None:
+                    raise self.invalid_token_exception
+            case _:
+                raise self.invalid_token_exception
+        
+        payload = jwt_strategy.decode_jwt(token)
+        if payload is None:
+            raise self.invalid_token_exception
+        
+        return payload
 
 
     @staticmethod
@@ -112,34 +171,6 @@ class AuthService:
             samesite='none' if IS_DEBUG else 'strict',
             expires=int(timedelta(days=auth_settings.auth_refresh_token_expire_days).total_seconds())
         )
-
-    @staticmethod
-    def get_authorized_user(request: Request):
-        auth_header: Optional[str] = request.headers.get("Authorization")
-
-        if not auth_header:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authorization header is required",
-            )
-
-        schema, _, token = auth_header.partition(" ")
-
-        if schema.lower() != 'bearer':
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid auth scheme",
-            )
-        
-        payload = jwt_strategy.decode_jwt(token.strip())
-
-        if payload is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired token",
-            )
-        
-        return payload
 
 
 auth_service = AuthService()
