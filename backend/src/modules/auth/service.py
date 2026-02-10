@@ -19,6 +19,8 @@ from modules.auth.schema import AuthInput, AuthOutput, AuthTokenEnum
 
 from config.settings import settings, auth_settings, IS_DEBUG
 
+from utils.normalize import normalize_email
+
 
 class AuthService:
     def __init__(self) -> None:
@@ -34,7 +36,7 @@ class AuthService:
     
 
     async def register(self, session: AsyncSession, data: AuthInput) -> AuthOutput:
-        data.email = data.email.lower()
+        data.email = normalize_email(data.email)
 
         is_exist = await user_service.get_by_email(session, data.email)
         if is_exist:
@@ -57,7 +59,7 @@ class AuthService:
 
 
     async def login(self, session: AsyncSession, data: AuthInput) -> AuthOutput:
-        data.email = data.email.lower()
+        data.email = normalize_email(data.email)
 
         query = select(UserModel).where(UserModel.email == data.email)
         result = await session.execute(query)
