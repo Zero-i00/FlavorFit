@@ -1,3 +1,4 @@
+from typing import Optional
 import strawberry
 from database.models.user import RoleEnum
 
@@ -8,6 +9,10 @@ class UserInput:
     is_active: bool = True
     role: RoleEnum = RoleEnum.USER
 
+
+@strawberry.input
+class UserUpdate:
+    email: Optional[str]
 
 @strawberry.type
 class UserOutput:

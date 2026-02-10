@@ -7,7 +7,7 @@ from typing import List, Optional
 from config.graphql import ContextInfo
 from modules.auth.guards.role import HasRole
 from modules.user.service import user_service
-from modules.user.schema import UserInput, UserOutput, RoleEnum
+from modules.user.schema import UserOutput, RoleEnum, UserUpdate
 
 not_found_exception = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
@@ -42,7 +42,7 @@ class UserQuery:
 class UserMutation:
     
     @strawberry.mutation
-    async def update(self, info: ContextInfo, id: int, obj: UserInput) -> Optional[UserOutput]:
+    async def update(self, info: ContextInfo, id: int, obj: UserUpdate) -> Optional[UserOutput]:
         updated = await user_service.update(info.context.session, id, obj)
         if updated is None:
             raise not_found_exception

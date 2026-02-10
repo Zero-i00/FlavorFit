@@ -3,7 +3,7 @@ from typing import List, Optional
 from sqlalchemy import select, delete
 from database.models.user import UserModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from modules.user.schema import UserInput, UserOutput
+from modules.user.schema import UserInput, UserOutput, UserUpdate
 
 
 class UserService:
@@ -44,7 +44,7 @@ class UserService:
 
         return self.to_schema(user)
     
-    async def update(self, session: AsyncSession, id: int, obj: UserInput) -> Optional[UserOutput]:
+    async def update(self, session: AsyncSession, id: int, obj: UserUpdate) -> Optional[UserOutput]:
         user = await session.get(UserModel, id)
         if not user:
             return None
