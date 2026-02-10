@@ -5,8 +5,9 @@ from fastapi import (
 )
 from typing import List, Optional
 from config.graphql import ContextInfo
+from modules.auth.guards.role import HasRole
 from modules.user.service import user_service
-from modules.user.schema import UserInput, UserOutput
+from modules.user.schema import UserInput, UserOutput, RoleEnum
 
 not_found_exception = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
@@ -16,7 +17,7 @@ not_found_exception = HTTPException(
 @strawberry.type
 class UserQuery:
 
-    @strawberry.field
+    @strawberry.field(permission_classes=[HasRole(RoleEnum.ADMIN)])
     async def list(self, info: ContextInfo) -> List[UserOutput]:
         return await user_service.list(info.context.session)
     

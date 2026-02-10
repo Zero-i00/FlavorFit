@@ -1,6 +1,6 @@
 import jwt
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from config.settings import auth_settings
 
 class JWTStrategy:
@@ -13,7 +13,7 @@ class JWTStrategy:
         expire_minutes: int = auth_settings.auth_access_token_expire_minutes,
         expire_timedelta: timedelta | None = None
     ):
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         to_encode = payload.copy()
 
         if expire_timedelta:
@@ -35,7 +35,7 @@ class JWTStrategy:
         public_key: str = auth_settings.public_key_path.read_text(),
         algorithm: str = auth_settings.auth_algorithm,
     ):
-        return jwt.decode(token, public_key, algorithms=[algorithm])
+        return jwt.decode(jwt=token, key=public_key, algorithms=[algorithm])
     
 
 jwt_strategy = JWTStrategy()

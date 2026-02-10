@@ -1,10 +1,11 @@
 from datetime import timedelta
+from typing import Optional
 from fastapi import (
+    Request,
     status,
     Response,
     HTTPException
 )
-
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,16 +14,13 @@ from database.models.user import UserModel
 from modules.user.service import user_service
 from modules.user.schema import UserInput, UserOutput
 
-from modules.auth.strategy.jwt_token import jwt_strategy
+from modules.auth.strategies.jwt_token import jwt_strategy
 from modules.auth.schema import AuthInput, AuthOutput, AuthTokenEnum
 
 from config.settings import settings, auth_settings, IS_DEBUG
 
 
 class AuthService:
-
-    async def me(self, session: AsyncSession) -> UserOutput:
-        ...
 
     async def register(self, session: AsyncSession, data: AuthInput) -> AuthOutput:
         data.email = data.email.lower()
@@ -112,8 +110,36 @@ class AuthService:
             secure=True,
             domain=settings.app_host,
             samesite='none' if IS_DEBUG else 'strict',
-            expires=timedelta(days=auth_settings.auth_refresh_token_expire_days).seconds
+            expires=int(timedelta(days=auth_settings.auth_refresh_token_expire_days).total_seconds())
         )
+
+    @staticmethod
+    def get_authorized_user(request: Request):
+        auth_header: Optional[str] = request.headers.get("Authorization")
+
+        if not auth_header:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authorization header is required",
+            )
+
+        schema, _, token = auth_header.partition(" ")
+
+        if schema.lower() != 'bearer':
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid auth scheme",
+            )
+        
+        payload = jwt_strategy.decode_jwt(token.strip())
+
+        if payload is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
+            )
+        
+        return payload
 
 
 auth_service = AuthService()

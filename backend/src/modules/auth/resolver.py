@@ -1,18 +1,30 @@
 import strawberry
+from fastapi import (
+    status,
+    HTTPException
+)
 
 from config.graphql import ContextInfo
 
 from modules.user.schema import UserOutput
 
 from modules.auth.service import auth_service
+from modules.auth.guards.auth import IsAuthenticated
 from modules.auth.schema import AuthInput, AuthOutput
 
 @strawberry.type
 class AuthQuery:
 
-    @strawberry.field
+    @strawberry.field(permission_classes=[IsAuthenticated])
     async def me(self, info: ContextInfo) -> UserOutput:
-        return await auth_service.me(info.context.session)
+        user = info.context.user
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Invalid or expired token"
+            )
+        
+        return user
     
 
 @strawberry.type
