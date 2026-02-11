@@ -26,10 +26,7 @@ class UserService:
         ]
     
     async def retrieve(self, session: AsyncSession, id: int) -> Optional[UserOutput]:
-        query = select(UserModel).where(UserModel.id == id)
-        result = await session.execute(query)
-        user = result.scalar_one_or_none()
-
+        user = await session.get(UserModel, id)
         return self.to_schema(user) if user else None
     
 
@@ -76,7 +73,7 @@ class UserService:
                     continue
                     
                 if hasattr(user.profile, field):
-                    setattr(user.parameters, field, value)
+                    setattr(user.profile, field, value)
 
         
         if obj.parameters:
