@@ -51,13 +51,13 @@ class UserModel(Base):
 
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    profile: Mapped[Optional['ProfileModel']] = relationship(back_populates="user")
-    cart: Mapped[Optional['CartModel']] = relationship(back_populates='user')
-    parameters: Mapped[Optional['BodyParameterModel']] = relationship(back_populates="user")
-    recipes: Mapped[List["RecipeModel"]] = relationship(back_populates="author")
-    comments: Mapped[List["CommentModel"]] = relationship(back_populates="author")
-    orders: Mapped[List["OrderModel"]] = relationship(back_populates="user")
-    favorites: Mapped[List["FavoriteModel"]] = relationship(back_populates="author")
+    profile: Mapped[Optional['ProfileModel']] = relationship(back_populates="user", lazy="selectin")
+    cart: Mapped[Optional['CartModel']] = relationship(back_populates='user', lazy="selectin")
+    parameters: Mapped[Optional['BodyParameterModel']] = relationship(back_populates="user", lazy="selectin")
+    recipes: Mapped[List["RecipeModel"]] = relationship(back_populates="author", lazy="raise_on_sql")
+    comments: Mapped[List["CommentModel"]] = relationship(back_populates="author", lazy="raise_on_sql")
+    orders: Mapped[List["OrderModel"]] = relationship(back_populates="user", lazy="raise_on_sql")
+    favorites: Mapped[List["FavoriteModel"]] = relationship(back_populates="author", lazy="raise_on_sql")
 
 
 
@@ -71,7 +71,7 @@ class ProfileModel(Base):
     gender: Mapped[Optional[GenderEnum]]
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
-    user: Mapped["UserModel"] = relationship(back_populates="profile")
+    user: Mapped["UserModel"] = relationship(back_populates="profile", lazy="raise_on_sql")
 
 
 class BodyParameterModel(Base):
@@ -86,8 +86,8 @@ class BodyParameterModel(Base):
     waist_cm: Mapped[Optional[float]]
     thigh_cm: Mapped[Optional[float]]
 
-    activity_level: Mapped[ActivityLevelEnum]
-    nutrition_goal: Mapped[NutritionGoalEnum]
+    activity_level: Mapped[ActivityLevelEnum] = mapped_column(default=ActivityLevelEnum.MODERATE)
+    nutrition_goal: Mapped[NutritionGoalEnum] = mapped_column(default=NutritionGoalEnum.MAINTENANCE)
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
-    user: Mapped["UserModel"] = relationship(back_populates="parameters")
+    user: Mapped["UserModel"] = relationship(back_populates="parameters", lazy="raise_on_sql")

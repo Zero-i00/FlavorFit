@@ -22,14 +22,6 @@ invalid_token_exception = HTTPException(
 
 @strawberry.type
 class AuthQuery:
-
-    @strawberry.field(permission_classes=[IsAuthenticated])
-    async def me(self, info: ContextInfo) -> UserOutput:
-        user = info.context.user
-        if not user:
-            raise invalid_token_exception
-        
-        return user
     
     @strawberry.field(permission_classes=[IsAuthenticated])
     async def refresh_token(self, info: ContextInfo) -> AuthOutput:
