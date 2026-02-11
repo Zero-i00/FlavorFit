@@ -53,9 +53,7 @@ class UserService:
         return self.to_schema(user)
     
     async def update(self, session: AsyncSession, id: int, obj: UserUpdate) -> Optional[UserOutput]:
-        stmt = select(UserModel).where(UserModel.id == id)
-        result = await session.execute(stmt)
-        user = result.scalar_one_or_none()
+        user = await session.get(UserModel, id)
 
         if not user:
             return None
