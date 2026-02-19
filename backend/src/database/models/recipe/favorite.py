@@ -15,7 +15,7 @@ class FavoriteModel(Base):
     )
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    author: Mapped["UserModel"] = relationship(back_populates="favorites")
+    author: Mapped["UserModel"] = relationship(back_populates="favorites", lazy='selectin')
 
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), index=True)
-    recipe: Mapped["RecipeModel"] = relationship(back_populates="favorites")
+    recipe: Mapped["RecipeModel"] = relationship(back_populates="favorites", lazy='selectin')

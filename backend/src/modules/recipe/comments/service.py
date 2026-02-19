@@ -1,11 +1,11 @@
-from typing import List, Optional, Sequence
+from typing import Sequence
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from strawberry import UNSET
 
-from database.models.reaction.comment import CommentModel
+from database.models.recipe.comment import CommentModel
 from modules.recipe.comments.schema import CommentOutput, CommentInput, CommentUpdate
 from modules.user.service import user_service
 
