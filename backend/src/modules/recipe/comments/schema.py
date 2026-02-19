@@ -9,7 +9,6 @@ from modules.user.schema import UserOutput
 class CommentInput:
     content: str
     recipe_id: int
-    author_id: int
 
 
 @strawberry.input

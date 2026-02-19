@@ -28,8 +28,8 @@ class CommentService:
             raise self.not_found_exception
         return comment
 
-    async def create(self, session: AsyncSession, obj: CommentInput) -> CommentModel:
-        comment = self.to_model(obj)
+    async def create(self, session: AsyncSession, obj: CommentInput, author_id: int) -> CommentModel:
+        comment = self.to_model(obj, author_id)
 
         session.add(comment)
         await session.commit()
@@ -69,10 +69,10 @@ class CommentService:
         )
 
     @staticmethod
-    def to_model(obj: CommentInput) -> CommentModel:
+    def to_model(obj: CommentInput, author_id: int) -> CommentModel:
         return CommentModel(
             content=obj.content,
-            author_id=obj.author_id,
+            author_id=author_id,
             recipe_id=obj.recipe_id,
         )
 

@@ -29,7 +29,7 @@ class CommentMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     async def create(self, info: ContextInfo, obj: CommentInput) -> CommentOutput:
-        comment = await comment_service.create(info.context.session, obj)
+        comment = await comment_service.create(info.context.session, obj, info.context.user.id)
         return comment_service.to_schema(comment)
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
