@@ -1,113 +1,112 @@
 import bcrypt
-from typing import List, Optional
-from sqlalchemy import select, delete
-from strawberry import UNSET
-from database.models.user import UserModel
-from utils.normalize import normalize_email
+from typing import Optional, Sequence
+
+from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from modules.user.schema import (
-    UserInput, UserOutput, UserUpdate,
-    ProfileOutput, BodyParameterOutput,
-)
+from strawberry import UNSET
+
+from database.models import UserModel
+from database.models.user import UserModel
 from database.models.user.user import ProfileModel, BodyParameterModel
+from modules.user.schema import UserInput, UserOutput, UserUpdate
+from modules.user.profile.schema import ProfileOutput
+from modules.user.parameters.schema import BodyParameterOutput
+from utils.normalize import normalize_email
 
 
 class UserService:
+    def __init__(self) -> None:
+        self.not_found_exception = HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
 
-    async def list(self, session: AsyncSession) -> List[UserOutput]:
+        self.already_exists_exception = HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User already exists",
+        )
+
+    async def list(self, session: AsyncSession) -> Sequence[UserModel]:
         query = select(UserModel)
         result = await session.execute(query)
+        return result.scalars().all()
 
-        users = result.scalars().all()
+    async def retrieve(self, session: AsyncSession, user_id: int) -> type[UserModel]:
+        user = await session.get(UserModel, user_id)
+        if user is None:
+            raise self.not_found_exception
+        return user
 
-        return [
-            self.to_schema(user)
-            for user in users
-        ]
-    
-    async def retrieve(self, session: AsyncSession, id: int) -> Optional[UserOutput]:
-        user = await session.get(UserModel, id)
-        return self.to_schema(user) if user else None
-    
-
-    async def get_by_email(self, session: AsyncSession, email: str) -> Optional[UserOutput]:
+    async def get_by_email(self, session: AsyncSession, email: str) -> Optional[UserModel]:
         query = select(UserModel).where(UserModel.email == email)
         result = await session.execute(query)
+        return result.scalar_one_or_none()
 
-        user = result.scalar_one_or_none()
-        return self.to_schema(user) if user else None
-    
-    async def create(self, session: AsyncSession, obj: UserInput) -> UserOutput:
+    async def create(self, session: AsyncSession, obj: UserInput) -> UserModel:
         user = UserModel(
-            email=obj.email,
-            password=self.hash_password(obj.password)
+            email=normalize_email(obj.email),
+            password=self.hash_password(obj.password),
         )
 
         session.add(user)
         await session.commit()
         await session.refresh(user)
 
-        return self.to_schema(user)
-    
-    async def update(self, session: AsyncSession, id: int, obj: UserUpdate) -> Optional[UserOutput]:
-        user = await session.get(UserModel, id)
+        return user
 
-        if not user:
-            return None
-        
-        if obj.email:
+    async def update(self, session: AsyncSession, user_id: int, obj: UserUpdate) -> UserModel:
+        user = await self.retrieve(session, user_id)
+
+        if obj.email is not UNSET and obj.email:
             user.email = normalize_email(obj.email)
 
-        if obj.password:
+        if obj.password is not UNSET and obj.password:
             user.password = self.hash_password(obj.password)
 
-        if obj.profile:
+        if obj.profile is not UNSET and obj.profile:
             if user.profile is None:
                 user.profile = ProfileModel(
                     user=user,
-                    full_name=obj.profile.full_name if obj.profile else user.email
+                    full_name=obj.profile.full_name if obj.profile.full_name is not UNSET else user.email,
                 )
 
             for field, value in vars(obj.profile).items():
                 if value is UNSET:
                     continue
-                    
                 if hasattr(user.profile, field):
                     setattr(user.profile, field, value)
 
-        
-        if obj.parameters:
+        if obj.parameters is not UNSET and obj.parameters:
             if user.parameters is None:
                 user.parameters = BodyParameterModel(user=user)
 
             for field, value in vars(obj.parameters).items():
                 if value is UNSET:
                     continue
-
                 if hasattr(user.parameters, field):
                     setattr(user.parameters, field, value)
 
         session.add(user)
-
         await session.commit()
         await session.refresh(user)
 
-        return self.to_schema(user)
+        return user
 
-    async def destroy(self, session: AsyncSession, id: int) -> None:
-        query = delete(UserModel).where(UserModel.id == id)
-        await session.execute(query)
+    async def destroy(self, session: AsyncSession, id: int) -> bool:
+        user = await self.retrieve(session, id)
+        await session.delete(user)
         await session.commit()
+        return True
 
     @staticmethod
     def hash_password(password: str) -> bytes:
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode(), salt)
-    
+
     @staticmethod
     def validate_password(password: str, hashed_password: bytes) -> bool:
         return bcrypt.checkpw(password.encode(), hashed_password)
-
 
     @staticmethod
     def to_schema(obj: UserModel) -> UserOutput:
@@ -117,9 +116,9 @@ class UserService:
             profile = ProfileOutput(
                 id=p.id,
                 full_name=p.full_name,
+                user_id=p.user_id,
                 age=p.age,
                 bio=p.bio,
-                user_id=p.user_id,
                 gender=p.gender,
             )
 
@@ -128,6 +127,7 @@ class UserService:
             bp = obj.parameters
             parameters = BodyParameterOutput(
                 id=bp.id,
+                user_id=bp.user_id,
                 height_cm=bp.height_cm,
                 weight_kg=bp.weight_kg,
                 goal_weight_kg=bp.goal_weight_kg,
@@ -142,14 +142,18 @@ class UserService:
         return UserOutput(
             id=obj.id,
             email=obj.email,
-            role=obj.role.value,
+            role=obj.role,
             is_active=obj.is_active,
             profile=profile,
             parameters=parameters,
         )
-    
+
+    @staticmethod
+    def to_model(obj: UserInput) -> UserModel:
+        return UserModel(
+            email=normalize_email(obj.email),
+            password=b'',
+        )
 
 
 user_service = UserService()
-
-

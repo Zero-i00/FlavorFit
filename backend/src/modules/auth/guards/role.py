@@ -10,6 +10,6 @@ def HasRole(required_role: RoleEnum):
 
         def has_permission(self, source, info: ContextInfo, **kwargs) -> bool:
             user = info.context.user
-            return user.role == required_role.name if user else False
+            return user.role == required_role if user else False
 
     return _HasRole

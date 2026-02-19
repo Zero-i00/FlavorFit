@@ -21,5 +21,10 @@ class ProfileUpdate:
 
 
 @strawberry.type
-class ProfileOutput(ProfileInput):
+class ProfileOutput:
     id: int
+    full_name: str
+    user_id: int
+    age: Optional[int] = UNSET
+    bio: Optional[str] = UNSET
+    gender: Optional[GenderEnum] = UNSET

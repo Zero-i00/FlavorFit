@@ -1,59 +1,42 @@
 import strawberry
-from fastapi import (
-    status,
-    HTTPException
-)
 from typing import List, Optional
+
 from config.graphql import ContextInfo
 from modules.auth.guards.role import HasRole
-from modules.user.service import user_service
 from modules.auth.guards.auth import IsAuthenticated
+from modules.user.service import user_service
 from modules.user.schema import UserUpdate, UserOutput, RoleEnum
 
-user_not_found_exception = HTTPException(
-    status_code=status.HTTP_404_NOT_FOUND,
-    detail="Не удалось найти пользователя"
-)
 
 @strawberry.type
 class UserQuery:
 
     @strawberry.field(permission_classes=[HasRole(RoleEnum.ADMIN)])
     async def list(self, info: ContextInfo) -> List[UserOutput]:
-        return await user_service.list(info.context.session)
-    
+        users = await user_service.list(info.context.session)
+        return [user_service.to_schema(u) for u in users]
+
     @strawberry.field(permission_classes=[HasRole(RoleEnum.ADMIN)])
-    async def retrieve(self, info: ContextInfo, id: int) -> Optional[UserOutput]:
-        instance = await user_service.retrieve(info.context.session, id)
-        if instance is None:
-            raise user_not_found_exception
-        
-        return instance
-    
+    async def retrieve(self, info: ContextInfo, user_id: int) -> UserOutput:
+        user = await user_service.retrieve(info.context.session, user_id)
+        return user_service.to_schema(user)
+
     @strawberry.field(permission_classes=[IsAuthenticated])
     async def profile(self, info: ContextInfo) -> UserOutput:
-        user = info.context.user
-        if user is None:
-            raise user_not_found_exception
-        
-        return user
-    
+        return user_service.to_schema(info.context.user)
+
     @strawberry.field
     async def get_by_email(self, info: ContextInfo, email: str) -> Optional[UserOutput]:
-        instance = await user_service.get_by_email(info.context.session, email)
-        if instance is None:
-            raise user_not_found_exception
-        
-        return instance
+        user = await user_service.get_by_email(info.context.session, email)
+        if user is None:
+            raise user_service.not_found_exception
+        return user_service.to_schema(user)
 
 
 @strawberry.type
 class UserMutation:
 
     @strawberry.mutation(permission_classes=[IsAuthenticated])
-    async def update(self, info: ContextInfo, id: int, obj: UserUpdate) -> Optional[UserOutput]:
-        updated = await user_service.update(info.context.session, id, obj)
-        if updated is None:
-            raise user_not_found_exception
-        
-        return updated
+    async def update(self, info: ContextInfo, user_id: int, obj: UserUpdate) -> UserOutput:
+        user = await user_service.update(info.context.session, user_id, obj)
+        return user_service.to_schema(user)

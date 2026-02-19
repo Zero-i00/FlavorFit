@@ -22,6 +22,11 @@ class IngredientUpdate:
 	
 	
 @strawberry.type
-class IngredientOutput(IngredientInput):
+class IngredientOutput:
 	id: int
-	
+	icon: str
+	name: str
+	price: float
+	description: str
+	initial_unit: IngredientUnitEnum
+

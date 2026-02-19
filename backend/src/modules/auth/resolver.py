@@ -1,41 +1,30 @@
 import strawberry
-from fastapi import (
-    Request,
-    status,
-    HTTPException
-)
+from fastapi import Request
 
 from config.graphql import ContextInfo
-
-from modules.user.schema import UserOutput
-
+from modules.user.service import user_service
 from modules.auth.service import auth_service
 from modules.auth.guards.auth import IsAuthenticated
 from modules.auth.schema import AuthInput, AuthOutput, AuthTokenEnum
 
 
-invalid_token_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid jwt token",
-    )
-        
-
 @strawberry.type
 class AuthQuery:
-    
+
     @strawberry.field(permission_classes=[IsAuthenticated])
     async def refresh_token(self, info: ContextInfo) -> AuthOutput:
-        if not info.context.request or not isinstance(info.context.request, Request):
-            raise invalid_token_exception
-        
-        response = await auth_service.refresh_token(info.context.session, info.context.request)
+        user = await auth_service.refresh_token(info.context.session, info.context.request)
 
-        refresh_token = auth_service.create_refresh_token(response.user)
+        access_token = auth_service.create_access_token(user)
+        refresh_token = auth_service.create_refresh_token(user)
 
         if info.context.response:
             auth_service.set_refresh_token_to_cookie(info.context.response, refresh_token)
 
-        return response
+        return AuthOutput(
+            user=user_service.to_schema(user),
+            access_token=access_token,
+        )
 
 
 @strawberry.type
@@ -43,31 +32,37 @@ class AuthMutation:
 
     @strawberry.mutation
     async def login(self, info: ContextInfo, data: AuthInput) -> AuthOutput:
-        response = await auth_service.login(info.context.session, data)
+        user = await auth_service.login(info.context.session, data)
 
-        refresh_token = auth_service.create_refresh_token(response.user)
+        access_token = auth_service.create_access_token(user)
+        refresh_token = auth_service.create_refresh_token(user)
+
         if info.context.response:
             auth_service.set_refresh_token_to_cookie(info.context.response, refresh_token)
 
-        return response
-    
+        return AuthOutput(
+            user=user_service.to_schema(user),
+            access_token=access_token,
+        )
+
     @strawberry.mutation
     async def register(self, info: ContextInfo, data: AuthInput) -> AuthOutput:
-        response = await auth_service.register(info.context.session, data)
+        user = await auth_service.register(info.context.session, data)
 
-        refresh_token = auth_service.create_refresh_token(response.user)
+        access_token = auth_service.create_access_token(user)
+        refresh_token = auth_service.create_refresh_token(user)
+
         if info.context.response:
             auth_service.set_refresh_token_to_cookie(info.context.response, refresh_token)
 
-        return response
-    
+        return AuthOutput(
+            user=user_service.to_schema(user),
+            access_token=access_token,
+        )
+
     @strawberry.mutation(permission_classes=[IsAuthenticated])
     async def logout(self, info: ContextInfo) -> None:
-        if not info.context.request or not isinstance(info.context.request, Request):
-            raise invalid_token_exception
-        
         refresh_token = info.context.request.cookies.get(AuthTokenEnum.REFRESH_TOKEN.value) or ""
         if info.context.response:
             info.context.response.delete_cookie(AuthTokenEnum.REFRESH_TOKEN.value)
-
         return await auth_service.logout(info.context.session, refresh_token)

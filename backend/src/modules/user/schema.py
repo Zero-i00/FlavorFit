@@ -26,9 +26,9 @@ class UserUpdate:
 @strawberry.type
 class UserOutput:
     id: int
-    role: str
+    role: RoleEnum
     email: str
     is_active: bool
 
-    profile: Optional[ProfileOutput] = UNSET
-    parameters: Optional[BodyParameterOutput] = UNSET
+    profile: Optional[ProfileOutput] = None
+    parameters: Optional[BodyParameterOutput] = None

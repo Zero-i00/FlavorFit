@@ -2,15 +2,16 @@ from typing import Optional
 from strawberry import Info
 from fastapi import Depends, Request
 from database.session import get_session
-from modules.user.schema import UserOutput
+from database.models.user import UserModel
 from strawberry.fastapi import BaseContext
 from modules.auth.service import auth_service
 from modules.auth.schema import AuthTokenEnum
 from modules.user.service import user_service
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 class GraphQLContext(BaseContext):
-    def __init__(self, request: Request, session: AsyncSession, user: Optional[UserOutput]):
+    def __init__(self, request: Request, session: AsyncSession, user: Optional[UserModel]):
         self.session = session
         self.request = request
         self.user = user
