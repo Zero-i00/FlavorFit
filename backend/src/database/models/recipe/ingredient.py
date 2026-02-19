@@ -48,7 +48,7 @@ class RecipeIngredientModel(Base):
     unit: Mapped[IngredientUnitEnum]
 
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), index=True)
-    recipe: Mapped["RecipeModel"] = relationship(back_populates="ingredients")
+    recipe: Mapped["RecipeModel"] = relationship(back_populates="ingredients", lazy='selectin')
 
     ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredients.id"), index=True)
-    ingredient: Mapped["IngredientModel"] = relationship(back_populates="recipes")
+    ingredient: Mapped["IngredientModel"] = relationship(back_populates="recipes", lazy='selectin')

@@ -1,7 +1,8 @@
 import strawberry
 from enum import Enum
-from typing import TYPE_CHECKING, List
 from database.orm import Base
+from typing import TYPE_CHECKING, List
+from sqlalchemy.event import listens_for
 from database.orm import max_char_field, max_text_field
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import CheckConstraint, Computed, ForeignKey
@@ -44,6 +45,7 @@ class RecipeModel(Base):
 
     title: Mapped[max_char_field]
     description: Mapped[max_text_field]
+    slug: Mapped[str] = mapped_column(unique=True, index=True)
 
     cook_time: Mapped[int]
     prepare_time: Mapped[int]
@@ -64,12 +66,13 @@ class RecipeModel(Base):
     )
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    author: Mapped["UserModel"] = relationship(back_populates="recipes")
+    author: Mapped["UserModel"] = relationship(back_populates="recipes", lazy="selectin")
 
-    steps: Mapped[List["RecipeCookStepModel"]] = relationship(back_populates="recipe")
-    ingredients: Mapped[List["RecipeIngredientModel"]] = relationship(back_populates="recipe")
+    steps: Mapped[List["RecipeCookStepModel"]] = relationship(back_populates="recipe", lazy="selectin")
+    ingredients: Mapped[List["RecipeIngredientModel"]] = relationship(back_populates="recipe", lazy="selectin")
     comments: Mapped[List["CommentModel"]] = relationship(back_populates="recipe")
     favorites: Mapped[List["FavoriteModel"]] = relationship(back_populates="recipe")
+
 
 
 class RecipeCookStepModel(Base):

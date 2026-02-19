@@ -15,7 +15,7 @@ class CartModel(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
     user: Mapped["UserModel"] = relationship(back_populates="cart")
 
-    items: Mapped[List["CartItem"]] = relationship(back_populates="cart")
+    items: Mapped[List["CartItem"]] = relationship(back_populates="cart", lazy="selectin")
     order: Mapped[Optional["OrderModel"]] = relationship(back_populates="cart")
 
 
