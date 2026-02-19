@@ -14,7 +14,7 @@ class CommentModel(Base):
     content: Mapped[max_text_field]
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    author: Mapped["UserModel"] = relationship(back_populates="comments")
+    author: Mapped["UserModel"] = relationship(back_populates="comments", lazy='selectin')
 
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), index=True)
-    recipe: Mapped["RecipeModel"] = relationship(back_populates="comments")
+    recipe: Mapped["RecipeModel"] = relationship(back_populates="comments", lazy='selectin')

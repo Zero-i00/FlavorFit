@@ -38,7 +38,6 @@ class IngredientService:
 			return None
 		
 		for field, value in vars(obj).items():
-			print(field, value)
 			if value is UNSET:
 				continue
 
@@ -59,7 +58,7 @@ class IngredientService:
 	
 	
 	@staticmethod
-	def to_schema(obj: IngredientModel) -> IngredientOutput:
+	def to_schema(obj: type[IngredientModel]) -> IngredientOutput:
 		return IngredientOutput(
 			id=obj.id,
 			icon=obj.icon,
