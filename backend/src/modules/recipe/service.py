@@ -30,6 +30,11 @@ class RecipeService:
             raise self.not_found_exception
         return recipe
 
+    async def list_by_user(self, session: AsyncSession, author_id: int) -> Sequence[RecipeModel]:
+        query = select(RecipeModel).where(RecipeModel.author_id == author_id)
+        result = await session.execute(query)
+        return result.scalars().all()
+
     async def get_by_slug(self, session: AsyncSession, slug: str) -> RecipeModel:
         query = select(RecipeModel).where(RecipeModel.slug == slug)
         result = await session.execute(query)

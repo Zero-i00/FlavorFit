@@ -1,0 +1,8 @@
+query GetProfile {
+    users {
+        profile {
+            id
+            role
+        }
+    }
+}

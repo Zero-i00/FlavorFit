@@ -22,6 +22,11 @@ class CommentService:
         result = await session.execute(query)
         return result.scalars().all()
 
+    async def list_by_user(self, session: AsyncSession, author_id: int) -> Sequence[CommentModel]:
+        query = select(CommentModel).where(CommentModel.author_id == author_id)
+        result = await session.execute(query)
+        return result.scalars().all()
+
     async def retrieve(self, session: AsyncSession, comment_id: int) -> CommentModel:
         comment = await session.get(CommentModel, comment_id)
         if comment is None:
