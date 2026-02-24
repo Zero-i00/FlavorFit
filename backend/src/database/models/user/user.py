@@ -1,16 +1,17 @@
-import strawberry
 from enum import Enum
 from typing import List
-from sqlalchemy import ForeignKey
 from typing import TYPE_CHECKING, Optional
-from database.orm import Base, max_char_field
+
+import strawberry
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from database.orm import Base, max_char_field
 
 if TYPE_CHECKING:
     from database.models.recipe import RecipeModel
     from database.models.order import CartModel, OrderModel
-    from database.models.reaction import CommentModel, FavoriteModel
+    from database.models.recipe import CommentModel, FavoriteModel
 
 
 @strawberry.enum

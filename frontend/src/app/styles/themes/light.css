@@ -1,0 +1,57 @@
+:root {
+  /* ─── Radius ────────────────────────────────────────── */
+  --radius: var(--rounded-lg);
+
+  /* ─── Base ──────────────────────────────────────────── */
+  --background:            var(--color-gray-100);
+  --foreground:            var(--color-gray-900);
+
+  /* ─── Card ──────────────────────────────────────────── */
+  --card:                  var(--color-white);
+  --card-foreground:       var(--color-gray-900);
+
+  /* ─── Popover ───────────────────────────────────────── */
+  --popover:               var(--color-white);
+  --popover-foreground:    var(--color-gray-900);
+
+  /* ─── Primary (Purple) ───────────────────────────────── */
+  --primary:               var(--color-primary-500);
+  --primary-foreground:    var(--color-white);
+
+  /* ─── Secondary (Yellow / Gold) ─────────────────────── */
+  --secondary:             var(--color-secondary-600);
+  --secondary-foreground:  var(--color-gray-900);
+
+  /* ─── Muted ─────────────────────────────────────────── */
+  --muted:                 var(--color-gray-200);
+  --muted-foreground:      var(--color-gray-600);
+
+  /* ─── Accent (neutral, minimal usage) ──────────────── */
+  --accent:                var(--color-gray-200);
+  --accent-foreground:     var(--color-gray-800);
+
+  /* ─── Destructive ───────────────────────────────────── */
+  --destructive:           var(--color-error-500);
+
+  /* ─── Border / Input / Ring ─────────────────────────── */
+  --border:                var(--color-gray-300);
+  --input:                 var(--color-gray-300);
+  --ring:                  var(--color-primary-400);
+
+  /* ─── Charts ────────────────────────────────────────── */
+  --chart-1:               var(--color-primary-500);
+  --chart-2:               var(--color-secondary-600);
+  --chart-3:               var(--color-info-500);
+  --chart-4:               var(--color-success-500);
+  --chart-5:               var(--color-warning-500);
+
+  /* ─── Sidebar ───────────────────────────────────────── */
+  --sidebar:               var(--color-white);
+  --sidebar-foreground:    var(--color-gray-900);
+  --sidebar-primary:       var(--color-primary-500);
+  --sidebar-primary-foreground: var(--color-white);
+  --sidebar-accent:        var(--color-primary-100);
+  --sidebar-accent-foreground: var(--color-primary-700);
+  --sidebar-border:        var(--color-gray-200);
+  --sidebar-ring:          var(--color-primary-400);
+}

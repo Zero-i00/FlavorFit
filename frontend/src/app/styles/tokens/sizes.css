@@ -1,0 +1,68 @@
+:root {
+  /* ─── Typography ─────────────────────────────────── */
+  --font-size-h1: 46px;
+  --line-height-h1: 68px;
+  --font-weight-h1: 500;
+
+  --font-size-h2: 38px;
+  --line-height-h2: 56px;
+  --font-weight-h2: 500;
+
+  --font-size-h3: 28px;
+  --line-height-h3: 42px;
+  --font-weight-h3: 500;
+
+  --font-size-h4: 24px;
+  --line-height-h4: 38px;
+  --font-weight-h4: 500;
+
+  --font-size-h5: 18px;
+  --line-height-h5: 28px;
+  --font-weight-h5: 500;
+
+  --font-size-h6: 15px;
+  --line-height-h6: 22px;
+  --font-weight-h6: 500;
+
+  --font-size-subtitle-1: 15px;
+  --line-height-subtitle-1: 22px;
+  --font-weight-subtitle-1: 400;
+
+  --font-size-subtitle-2: 13px;
+  --line-height-subtitle-2: 20px;
+  --font-weight-subtitle-2: 400;
+
+  --font-size-body-1: 15px;
+  --line-height-body-1: 22px;
+  --font-weight-body-1: 400;
+
+  --font-size-body-2: 13px;
+  --line-height-body-2: 20px;
+  --font-weight-body-2: 400;
+
+  --font-size-caption: 13px;
+  --line-height-caption: 18px;
+  --font-weight-caption: 400;
+
+  --font-size-overline: 12px;
+  --line-height-overline: 14px;
+  --font-weight-overline: 400;
+
+  /* ─── Border Radius ─────────────────────────────────── */
+  --rounded-xs:   0.25rem;   /*  4px */
+  --rounded-sm:   0.375rem;  /*  6px */
+  --rounded-md:   0.5rem;    /*  8px */
+  --rounded-lg:   0.75rem;   /* 12px */
+  --rounded-xl:   1rem;      /* 16px */
+  --rounded-2xl:  1.25rem;   /* 20px */
+  --rounded-3xl:  1.5rem;    /* 24px */
+  --rounded-full: 9999px;
+
+  /* ─── Icons ─────────────────────────────────── */
+  --icon-xs: 12px;
+  --icon-sm: 16px;
+  --icon-tn: 18px;
+  --icon-md: 24px;
+  --icon-lg: 32px;
+  --icon-xl: 48px;
+}

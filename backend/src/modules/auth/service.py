@@ -2,16 +2,15 @@ from datetime import timedelta
 from typing import Any, Optional
 
 from fastapi import Request, status, Response, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models.user import UserModel
-from modules.user.service import user_service
-from modules.user.schema import UserInput
-
-from modules.auth.strategies.jwt_token import jwt_strategy
-from modules.auth.schema import AuthInput, AuthTokenEnum
-
 from config.settings import settings, auth_settings, IS_DEBUG
+from database.models.user import UserModel
+from modules.auth.schema import AuthInput, AuthTokenEnum
+from modules.auth.strategies.jwt_token import jwt_strategy
+from modules.user.schema import UserInput
+from modules.user.service import user_service
 from utils.normalize import normalize_email
 
 
@@ -51,6 +50,21 @@ class AuthService:
 
         if not user_service.validate_password(data.password, user.password):
             raise self.invalid_credentials_exception
+
+        return user
+
+    async def register(self, session: AsyncSession, data: AuthInput) -> UserModel:
+        data.email = normalize_email(data.email)
+
+        existing_query = select(UserModel).where(UserModel.email == data.email)
+        existing = await session.execute(existing_query)
+        if existing.scalar_one_or_none():
+            raise user_service.already_exists_exception
+
+        user = await user_service.create(session, UserInput(
+            email=data.email,
+            password=data.password
+        ))
 
         return user
 
